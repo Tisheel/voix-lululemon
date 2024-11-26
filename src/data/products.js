@@ -130,5 +130,5 @@ export const products = [
       "Adjustable drawstrings",
     ],
     tags: ["Eco-Friendly", "Sustainable"],
-  },
+  }
 ];
