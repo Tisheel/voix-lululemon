@@ -6,32 +6,37 @@ const ProductsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedSizes, setSelectedSizes] = useState([]);
+  const [selectedGenders, setSelectedGenders] = useState([]);
+  const [selectedFits, setSelectedFits] = useState([]);
 
-  // Extract unique values for filters
-  const allColors = Array.from(new Set(products.flatMap((p) => p.colors)));
+  // Extract unique filter values
+  const allColors = Array.from(new Set(products.map((p) => p.color)));
   const allCategories = Array.from(new Set(products.map((p) => p.category)));
-  const allSizes = Array.from(new Set(products.flatMap((p) => p.sizes)));
+  const allGenders = Array.from(new Set(products.map((p) => p.gender)));
+  const allFits = Array.from(new Set(products.map((p) => p.fit)));
 
-  // Handle filtering
+  // Filtering logic
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesColors =
-      selectedColors.length === 0 ||
-      product.colors.some((color) => selectedColors.includes(color));
+      selectedColors.length === 0 || selectedColors.includes(product.color);
 
     const matchesCategories =
       selectedCategories.length === 0 ||
       selectedCategories.includes(product.category);
 
-    const matchesSizes =
-      selectedSizes.length === 0 ||
-      product.sizes.some((size) => selectedSizes.includes(size));
+    const matchesGenders =
+      selectedGenders.length === 0 || selectedGenders.includes(product.gender);
 
-    return matchesSearch && matchesColors && matchesCategories && matchesSizes;
+    const matchesFits =
+      selectedFits.length === 0 || selectedFits.includes(product.fit);
+
+    return (
+      matchesSearch && matchesColors && matchesCategories && matchesGenders && matchesFits
+    );
   });
 
   // Toggle filter selection
@@ -43,7 +48,6 @@ const ProductsPage = () => {
 
   return (
     <div className="container mx-auto py-12">
-
       <div className="flex justify-between">
         <h1 className="text-3xl font-bold mb-6">Products</h1>
         {/* Search Box */}
@@ -59,7 +63,7 @@ const ProductsPage = () => {
       </div>
 
       <div className="flex h-screen">
-        {/* Sidebar Filters */}
+        {/* Filters Sidebar */}
         <div className="w-1/4 p-4 bg-gray-100 rounded-lg shadow-md">
 
           {/* Filter by Color */}
@@ -69,14 +73,14 @@ const ProductsPage = () => {
               {allColors.map((color) => (
                 <button
                   key={color}
-                  className={`w-8 h-8 rounded-full border-2 ${selectedColors.includes(color)
-                      ? "border-blue-500"
-                      : "border-gray-300"
+                  className={`px-4 py-2 border rounded ${selectedColors.includes(color)
+                      ? "border-blue-500 text-blue-500"
+                      : "border-gray-300 text-gray-700"
                     }`}
-                  style={{ backgroundColor: color.toLowerCase() }}
                   onClick={() => toggleSelection(color, setSelectedColors)}
-                  title={color}
-                />
+                >
+                  {color}
+                </button>
               ))}
             </div>
           </div>
@@ -100,28 +104,43 @@ const ProductsPage = () => {
             </div>
           </div>
 
-          {/* Filter by Size */}
+          {/* Filter by Gender */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-2">Sizes</h3>
-            <div className="flex flex-wrap gap-2">
-              {allSizes.map((size) => (
-                <button
-                  key={size}
-                  className={`px-4 py-2 border rounded ${selectedSizes.includes(size)
-                      ? "border-blue-500 text-blue-500"
-                      : "border-gray-300 text-gray-700"
-                    }`}
-                  onClick={() => toggleSelection(size, setSelectedSizes)}
-                >
-                  {size}
-                </button>
+            <h3 className="text-lg font-semibold mb-2">Gender</h3>
+            <div className="space-y-2">
+              {allGenders.map((gender) => (
+                <label key={gender} className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedGenders.includes(gender)}
+                    onChange={() => toggleSelection(gender, setSelectedGenders)}
+                  />
+                  <span>{gender}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Filter by Fit */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-2">Fit</h3>
+            <div className="space-y-2">
+              {allFits.map((fit) => (
+                <label key={fit} className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedFits.includes(fit)}
+                    onChange={() => toggleSelection(fit, setSelectedFits)}
+                  />
+                  <span>{fit}</span>
+                </label>
               ))}
             </div>
           </div>
         </div>
 
         {/* Product Grid */}
-        <div className="w-3/4 overflow-y-auto flex flex-wrap gap-6 ml-8">
+        <div className="w-3/4 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 ml-8">
           {filteredProducts.length > 0 ? (
             filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
