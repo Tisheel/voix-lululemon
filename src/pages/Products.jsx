@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ProductCard from "../components/ProductCard";
 import { products } from "../data/products";
+import axios from "axios";
+import { BASE_URL } from "../urls/urls";
 
 const ProductsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -8,6 +10,25 @@ const ProductsPage = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedGenders, setSelectedGenders] = useState([]);
   const [selectedFits, setSelectedFits] = useState([]);
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    axios
+      .get(BASE_URL + "get_all_products", {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        withCredentials: true, // Include this if you're using cookies/sessions
+      })
+      .then((response) => {
+        console.log(response);
+        //setProducts(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching products:", error);
+      });
+  }, []);
 
   // Extract unique filter values
   const allColors = Array.from(new Set(products.map((p) => p.color)));
@@ -16,28 +37,28 @@ const ProductsPage = () => {
   const allFits = Array.from(new Set(products.map((p) => p.fit)));
 
   // Filtering logic
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch =
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase());
+  // const filteredProducts = products.filter((product) => {
+  //   const matchesSearch =
+  //     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     product.description.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesColors =
-      selectedColors.length === 0 || selectedColors.includes(product.color);
+  //   const matchesColors =
+  //     selectedColors.length === 0 || selectedColors.includes(product.color);
 
-    const matchesCategories =
-      selectedCategories.length === 0 ||
-      selectedCategories.includes(product.category);
+  //   const matchesCategories =
+  //     selectedCategories.length === 0 ||
+  //     selectedCategories.includes(product.category);
 
-    const matchesGenders =
-      selectedGenders.length === 0 || selectedGenders.includes(product.gender);
+  //   const matchesGenders =
+  //     selectedGenders.length === 0 || selectedGenders.includes(product.gender);
 
-    const matchesFits =
-      selectedFits.length === 0 || selectedFits.includes(product.fit);
+  //   const matchesFits =
+  //     selectedFits.length === 0 || selectedFits.includes(product.fit);
 
-    return (
-      matchesSearch && matchesColors && matchesCategories && matchesGenders && matchesFits
-    );
-  });
+  //   return (
+  //     matchesSearch && matchesColors && matchesCategories && matchesGenders && matchesFits
+  //   );
+  // });
 
   // Toggle filter selection
   const toggleSelection = (value, setSelected) => {
@@ -65,7 +86,6 @@ const ProductsPage = () => {
       <div className="flex h-screen">
         {/* Filters Sidebar */}
         <div className="w-1/4 p-4 bg-gray-100 rounded-lg shadow-md">
-
           {/* Filter by Color */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-2">Colors</h3>
@@ -73,10 +93,11 @@ const ProductsPage = () => {
               {allColors.map((color) => (
                 <button
                   key={color}
-                  className={`px-4 py-2 border rounded ${selectedColors.includes(color)
+                  className={`px-4 py-2 border rounded ${
+                    selectedColors.includes(color)
                       ? "border-blue-500 text-blue-500"
                       : "border-gray-300 text-gray-700"
-                    }`}
+                  }`}
                   onClick={() => toggleSelection(color, setSelectedColors)}
                 >
                   {color}
@@ -141,8 +162,8 @@ const ProductsPage = () => {
 
         {/* Product Grid */}
         <div className="w-3/4 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 ml-8">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => (
+          {products.length > 0 ? (
+            products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))
           ) : (
