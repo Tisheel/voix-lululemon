@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../urls/urls";
 import axios from "axios";
@@ -75,9 +75,11 @@ const model = genAI.getGenerativeModel({
 });
 
 const TemporarySearch = ({ onSearch }) => {
-  const [searchTerm, setSearchTerm] = useState("");
   const [aiResponse, setAiResponse] = useState("");
   const navigate = useNavigate();
+
+  const [transcript, setTranscript] = useState("");
+  const [isListening, setIsListening] = useState(false);
 
   const groupSearch = (query) => {
     navigate({
@@ -145,15 +147,10 @@ const TemporarySearch = ({ onSearch }) => {
     }
   };
 
-  const handleInputChange = (event) => {
-    setSearchTerm(event.target.value);
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const handleSubmit = (searchTerm) => {
+    // e?.preventDefault()
     if (searchTerm.toLowerCase().includes("previous page")) {
       navigate(-1); // Go back to the previous page
-      setSearchTerm("");
       return; // Exit the function to prevent further execution
     }
     if (searchTerm.trim()) {
@@ -171,13 +168,53 @@ const TemporarySearch = ({ onSearch }) => {
       `;
 
       handleAIChat(prompt);
-      setSearchTerm("");
     }
   };
 
+  useEffect(() => {
+    if (!("webkitSpeechRecognition" in window)) {
+      console.error("Web Speech API not supported in this browser.");
+      return;
+    }
+
+    // Create a new instance of webkitSpeechRecognition
+    const recognition = new window.webkitSpeechRecognition();
+
+    recognition.continuous = true;  // Keep the speech recognition active
+    recognition.interimResults = true;  // Allow interim results to be captured
+    recognition.lang = "en-US";  // Set the language (adjust if necessary)
+
+    recognition.onstart = () => {
+      setIsListening(true);  // Set listening to true when speech recognition starts
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);  // Set listening to false when speech recognition ends
+    };
+
+    recognition.onresult = (event) => {
+      let currentTranscript = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        currentTranscript += event.results[i][0].transcript;
+      }
+      setTranscript(currentTranscript);  // Continuously update the transcript
+      // Call your function when you have the final transcript (optional)
+      if (event.results[event.results.length - 1].isFinal) {
+        handleSubmit(currentTranscript);
+      }
+    };
+
+    // Start listening when the component mounts
+    recognition.start();
+
+    return () => {
+      recognition.stop();  // Stop recognition when the component unmounts
+    };
+  }, []);
+
   return (
     <div className="flex flex-col space-y-4">
-      <form onSubmit={handleSubmit} className="flex items-center space-x-2">
+      {/* <form onSubmit={handleSubmit} className="flex items-center space-x-2">
         <input
           type="text"
           value={searchTerm}
@@ -191,8 +228,9 @@ const TemporarySearch = ({ onSearch }) => {
         >
           Search
         </button>
-      </form>
-
+      </form> */}
+      <p><strong>Status:</strong> {isListening ? "Listening..." : "Not Listening"}</p> {/* Show listening status */}
+      <p><strong>Transcription:</strong> {transcript || "Speak something..."}</p> {/* Display the transcript */}
       {aiResponse && (
         <div className="mt-4 p-4 bg-gray-100 rounded-lg">
           <p className="text-gray-700">{aiResponse}</p>
