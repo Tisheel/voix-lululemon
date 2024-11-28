@@ -3,6 +3,7 @@ import ProductCard from "../components/ProductCard";
 import { products } from "../data/products";
 import axios from "axios";
 import { BASE_URL } from "../urls/urls";
+import { useLocation } from "react-router-dom"; // Import useLocation
 
 const ProductsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -12,53 +13,63 @@ const ProductsPage = () => {
   const [selectedFits, setSelectedFits] = useState([]);
   const [products, setProducts] = useState([]);
 
-  useEffect(() => {
-    axios
-      .get(BASE_URL + "get_all_products", {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        withCredentials: true, // Include this if you're using cookies/sessions
-      })
-      .then((response) => {
-        console.log(response);
-        //setProducts(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching products:", error);
-      });
-  }, []);
+  const location = useLocation();
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const params = new URLSearchParams(location.search);
+        const searchParam = params.get("search");
+
+        // If there's a search parameter in the URL, use it
+        if (searchParam) {
+          setSearchQuery(searchParam);
+          const response = await axios.get(`${BASE_URL}group_search`, {
+            params: { q: searchParam },
+          });
+          setProducts(response.data.results);
+        } else {
+          // Only fetch all products if there's no search parameter
+          const response = await axios.get(`${BASE_URL}get_all_products`);
+          setProducts(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
+  }, [location.search]);
   // Extract unique filter values
   const allColors = Array.from(new Set(products.map((p) => p.color)));
   const allCategories = Array.from(new Set(products.map((p) => p.category)));
   const allGenders = Array.from(new Set(products.map((p) => p.gender)));
   const allFits = Array.from(new Set(products.map((p) => p.fit)));
 
-  // Filtering logic
-  // const filteredProducts = products.filter((product) => {
-  //   const matchesSearch =
-  //     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //     product.description.toLowerCase().includes(searchQuery.toLowerCase());
+  //Filtering logic
+  const filteredProducts = products.filter((product) => {
+    // const matchesSearch =
+    //   product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    //   product.description.toLowerCase().includes(searchQuery.toLowerCase());
 
-  //   const matchesColors =
-  //     selectedColors.length === 0 || selectedColors.includes(product.color);
+    const matchesColors =
+      selectedColors.length === 0 || selectedColors.includes(product.color);
 
-  //   const matchesCategories =
-  //     selectedCategories.length === 0 ||
-  //     selectedCategories.includes(product.category);
+    const matchesCategories =
+      selectedCategories.length === 0 ||
+      selectedCategories.includes(product.category);
 
-  //   const matchesGenders =
-  //     selectedGenders.length === 0 || selectedGenders.includes(product.gender);
+    const matchesGenders =
+      selectedGenders.length === 0 || selectedGenders.includes(product.gender);
 
-  //   const matchesFits =
-  //     selectedFits.length === 0 || selectedFits.includes(product.fit);
+    const matchesFits =
+      selectedFits.length === 0 || selectedFits.includes(product.fit);
 
-  //   return (
-  //     matchesSearch && matchesColors && matchesCategories && matchesGenders && matchesFits
-  //   );
-  // });
+    return (
+      // matchesSearch &&
+      matchesColors && matchesCategories && matchesGenders && matchesFits
+    );
+  });
 
   // Toggle filter selection
   const toggleSelection = (value, setSelected) => {
@@ -162,8 +173,8 @@ const ProductsPage = () => {
 
         {/* Product Grid */}
         <div className="w-3/4 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 ml-8">
-          {products.length > 0 ? (
-            products.map((product) => (
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))
           ) : (

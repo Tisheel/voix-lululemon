@@ -1,13 +1,69 @@
-import React from "react";
-import { Link, useParams } from "react-router-dom";
-import { products } from "../data/products";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import axios from "axios";
+import { BASE_URL } from "../urls/urls";
 
 const ProductDetails = () => {
-  const { id } = useParams();
-  const product = products.find((p) => p.id === parseInt(id));
+  const location = useLocation();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (!product) {
-    return <p>Product not found</p>;
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      try {
+        setLoading(true);
+        // Get search parameter from URL
+        const params = new URLSearchParams(location.search);
+        const searchQuery = params.get("search");
+
+        console.log("Search Query:", searchQuery); // Debug log
+
+        if (!searchQuery) {
+          setError("No search query provided");
+          setLoading(false);
+          return;
+        }
+
+        const response = await axios.get(`${BASE_URL}particular_search/`, {
+          params: {
+            q: searchQuery,
+          },
+        });
+
+        console.log("API Response:", response.data); // Debug log
+        setProduct(response.data.results);
+        setError(null);
+      } catch (error) {
+        console.error("Error fetching product details:", error);
+        setError("Failed to load product details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductDetails();
+  }, [location.search]); // Dependency on location.search
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-12 flex justify-center items-center">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="container mx-auto py-12">
+        <p className="text-red-500">{error || "Product not found"}</p>
+        <Link to="/products">
+          <button className="mt-4 bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300 transition">
+            Back to Products
+          </button>
+        </Link>
+      </div>
+    );
   }
 
   const {
@@ -81,10 +137,10 @@ const ProductDetails = () => {
             <button className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition">
               Add to Cart
             </button>
-            <Link to='/products'>
-            <button className="ml-4 bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300 transition">
-              Back to Products
-            </button>
+            <Link to="/products">
+              <button className="ml-4 bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300 transition">
+                Back to Products
+              </button>
             </Link>
           </div>
         </div>
