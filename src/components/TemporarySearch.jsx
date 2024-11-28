@@ -5,7 +5,7 @@ import axios from "axios";
 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const genAI = new GoogleGenerativeAI("AIzaSyB5VNULcuxAjbppS2DPRyErxNd7jXiCky0");
+const genAI = new GoogleGenerativeAI("AIzaSyCAUsw6x2fBnBseE5BazF0F-cwKAtO5Tic");
 
 // Define the function declarations for the model
 const functionDeclarations = [
@@ -91,7 +91,7 @@ const TemporarySearch = ({ onSearch }) => {
       params: { q: query },
     });
     console.log(response);
-    return response.data;
+    navigate("/cart");
   };
 
   const finalizeCart = async (confirmation) => {
@@ -151,6 +151,11 @@ const TemporarySearch = ({ onSearch }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    if (searchTerm.toLowerCase().includes("previous page")) {
+      navigate(-1); // Go back to the previous page
+      setSearchTerm("");
+      return; // Exit the function to prevent further execution
+    }
     if (searchTerm.trim()) {
       const prompt = `  
         User Query: ${searchTerm}  
@@ -161,7 +166,8 @@ const TemporarySearch = ({ onSearch }) => {
         3. If it's about adding items to cart (e.g., "add blue shirt to cart"), use addToCart  
         4. If it's about checking out or finalizing cart (e.g., "checkout my cart"), use finalizeCart with confirmation=true  
         
-        Please analyze the query and call the appropriate function with the relevant parameters.  
+        Please analyze the query and call the appropriate function with the relevant parameters. 
+  
       `;
 
       handleAIChat(prompt);
