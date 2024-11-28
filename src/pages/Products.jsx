@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ProductCard from "../components/ProductCard";
 import { products } from "../data/products";
+import axios from "axios";
+import { BASE_URL } from "../urls/urls";
+import { useLocation } from "react-router-dom"; // Import useLocation
 
 const ProductsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -8,18 +11,46 @@ const ProductsPage = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedGenders, setSelectedGenders] = useState([]);
   const [selectedFits, setSelectedFits] = useState([]);
+  const [products, setProducts] = useState([]);
 
+  const location = useLocation();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const params = new URLSearchParams(location.search);
+        const searchParam = params.get("search");
+
+        // If there's a search parameter in the URL, use it
+        if (searchParam) {
+          setSearchQuery(searchParam);
+          const response = await axios.get(`${BASE_URL}group_search`, {
+            params: { q: searchParam },
+          });
+          setProducts(response.data.results);
+        } else {
+          // Only fetch all products if there's no search parameter
+          const response = await axios.get(`${BASE_URL}get_all_products`);
+          setProducts(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
+  }, [location.search]);
   // Extract unique filter values
   const allColors = Array.from(new Set(products.map((p) => p.color)));
   const allCategories = Array.from(new Set(products.map((p) => p.category)));
   const allGenders = Array.from(new Set(products.map((p) => p.gender)));
   const allFits = Array.from(new Set(products.map((p) => p.fit)));
 
-  // Filtering logic
+  //Filtering logic
   const filteredProducts = products.filter((product) => {
-    const matchesSearch =
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase());
+    // const matchesSearch =
+    //   product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    //   product.description.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesColors =
       selectedColors.length === 0 || selectedColors.includes(product.color);
@@ -35,7 +66,8 @@ const ProductsPage = () => {
       selectedFits.length === 0 || selectedFits.includes(product.fit);
 
     return (
-      matchesSearch && matchesColors && matchesCategories && matchesGenders && matchesFits
+      // matchesSearch &&
+      matchesColors && matchesCategories && matchesGenders && matchesFits
     );
   });
 
@@ -65,7 +97,6 @@ const ProductsPage = () => {
       <div className="flex h-screen">
         {/* Filters Sidebar */}
         <div className="w-1/4 p-4 bg-gray-100 rounded-lg shadow-md">
-
           {/* Filter by Color */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-2">Colors</h3>
@@ -73,10 +104,11 @@ const ProductsPage = () => {
               {allColors.map((color) => (
                 <button
                   key={color}
-                  className={`px-4 py-2 border rounded ${selectedColors.includes(color)
+                  className={`px-4 py-2 border rounded ${
+                    selectedColors.includes(color)
                       ? "border-blue-500 text-blue-500"
                       : "border-gray-300 text-gray-700"
-                    }`}
+                  }`}
                   onClick={() => toggleSelection(color, setSelectedColors)}
                 >
                   {color}

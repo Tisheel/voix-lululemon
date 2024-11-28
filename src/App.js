@@ -6,14 +6,16 @@ import Home from "./pages/Home";
 import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
+import TemporarySearch from "./components/TemporarySearch";
 
 const App = () => (
   <Router>
+    <TemporarySearch />
     <Navbar />
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/products" element={<Products />} />
-      <Route path="/products/:id" element={<ProductDetails />} />
+      <Route path="/product" element={<ProductDetails />} />
       <Route path="/cart" element={<Cart />} />
     </Routes>
     <Footer />
