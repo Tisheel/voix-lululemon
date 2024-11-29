@@ -1,12 +1,60 @@
-import React from 'react';
+import React from "react";
 
-const Home = () => (
-  <div>
-    <section className="hero bg-gray-100 p-8">
-      <h1 className="text-4xl font-bold text-center">Welcome to Lululemon</h1>
-      <p className="text-center mt-4">Explore our latest collection.</p>
-    </section>
-  </div>
-);
+const HomePage = () => {
+  return (
+    <div className="container mx-auto">
+      {/* Banner Section */}
+      <div className="relative">
+        <img
+          src="https://images.lululemon.com/is/image/lululemon/NA_NOV24_HMD24_BlackFriday_Ecomm_Homepage_1_1_Med_MediaAction_D_Shorts_Pants?wid=1600&op_usm=0.5,2,10,0&fmt=webp&qlt=80,1&fit=constrain,0&op_sharpen=0&resMode=sharp2&iccEmbed=0&printRes=72"
+          alt="Shop the latest"
+          className="w-full h-[400px] object-cover rounded-lg shadow-md"
+        />
+        <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+          <div className="text-center text-white">
+            <h1 className="text-4xl font-bold">Discover Your Style</h1>
+            <p className="mt-4 text-lg">
+              Shop the latest collection of activewear and casual wear.
+            </p>
+          </div>
+        </div>
+      </div>
 
-export default Home;
+      {/* Featured Section */}
+      <div className="mt-4 p-4">
+        <h2 className="text-2xl font-bold mb-6">Featured Collections</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div>
+            <img
+              src="https://images.lululemon.com/is/image/lululemon/LW3FGDS_026865_1?wid=1440&op_usm=0.8,1,10,0&fmt=webp&qlt=80,1&fit=constrain,0&op_sharpen=0&resMode=sharp2&iccEmbed=0&printRes=72"
+              alt="Collection 1"
+              className="w-full h-[300px] object-cover rounded-lg shadow-md"
+            />
+            <h3 className="mt-4 text-lg font-semibold">Activewear</h3>
+            <p className="text-gray-600">Stay fit in style.</p>
+          </div>
+          <div>
+            <img
+              src="https://images.lululemon.com/is/image/lululemon/LM3DSKS_038570_1?wid=1440&op_usm=0.8,1,10,0&fmt=webp&qlt=80,1&fit=constrain,0&op_sharpen=0&resMode=sharp2&iccEmbed=0&printRes=72"
+              alt="Collection 2"
+              className="w-full h-[300px] object-cover rounded-lg shadow-md"
+            />
+            <h3 className="mt-4 text-lg font-semibold">Casual Wear</h3>
+            <p className="text-gray-600">Effortless comfort for your day.</p>
+          </div>
+          <div>
+            <img
+              src="https://images.lululemon.com/is/image/lululemon/LW3DAMS_032894_1?wid=1440&op_usm=0.8,1,10,0&fmt=webp&qlt=80,1&fit=constrain,0&op_sharpen=0&resMode=sharp2&iccEmbed=0&printRes=72"
+              alt="Collection 3"
+              className="w-full h-[300px] object-cover rounded-lg shadow-md"
+            />
+            <h3 className="mt-4 text-lg font-semibold">Accessories</h3>
+            <p className="text-gray-600">Gear up for your workout.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default HomePage;

@@ -177,7 +177,7 @@ const TemporarySearch = ({ onSearch }) => {
 
   return (
     <div className="flex flex-col space-y-4">
-      <form onSubmit={handleSubmit} className="flex items-center space-x-2">
+      {/* <form onSubmit={handleSubmit} className="flex items-center space-x-2">
         <input
           type="text"
           value={searchTerm}
@@ -191,8 +191,16 @@ const TemporarySearch = ({ onSearch }) => {
         >
           Search
         </button>
-      </form>
-
+      </form> */}
+      <p>
+        <strong>Status:</strong>{" "}
+        {isListening ? "Listening..." : "Not Listening"}
+      </p>{" "}
+      {/* Show listening status */}
+      <p>
+        <strong>Transcription:</strong> {transcript || "Speak something..."}
+      </p>{" "}
+      {/* Display the transcript */}
       {aiResponse && (
         <div className="mt-4 p-4 bg-gray-100 rounded-lg">
           <p className="text-gray-700">{aiResponse}</p>
