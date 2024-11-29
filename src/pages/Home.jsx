@@ -1,6 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const HomePage = () => {
+  const [speechStarted, setSpeechStarted] = useState(false);
+  useEffect(() => {
+    const speakMessage = (message) => {
+      if ("speechSynthesis" in window) {
+        const speech = new SpeechSynthesisUtterance(message);
+        speech.lang = "en-GB";
+        speech.rate = 1; // Speed of speech (1 is normal speed)
+        speech.pitch = 1.1; // Pitch of the voice (1 is normal pitch)
+        speech.volume = 1; // Volume (0 to 1)
+        window.speechSynthesis.speak(speech);
+      } else {
+        console.warn("Speech Synthesis not supported in this browser.");
+      }
+    };
+
+    // Message to be read out
+    const welcomeMessage =
+      "Welcome to Lululemon. I am VOI, your personal voice assistant. Are you looking for a list of products or do you have something specific in your mind?";
+
+    speakMessage(welcomeMessage);
+  }, []); // Empty dependency array to ensure this runs only once on page load
+
   return (
     <div className="container mx-auto">
       {/* Banner Section */}
