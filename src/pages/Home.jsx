@@ -3,17 +3,30 @@ import React, { useEffect, useState } from "react";
 const HomePage = () => {
   const [speechStarted, setSpeechStarted] = useState(false);
   useEffect(() => {
-    const speakMessage = (message) => {
-      if ("speechSynthesis" in window) {
-        const speech = new SpeechSynthesisUtterance(message);
-        speech.lang = "en-GB";
-        speech.rate = 1; // Speed of speech (1 is normal speed)
-        speech.pitch = 1.1; // Pitch of the voice (1 is normal pitch)
-        speech.volume = 1; // Volume (0 to 1)
-        window.speechSynthesis.speak(speech);
-      } else {
-        console.warn("Speech Synthesis not supported in this browser.");
-      }
+    const speakText = (text) => {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voices = window.speechSynthesis.getVoices();
+      utterance.voice =
+        voices.find(
+          (v) =>
+            v.lang.includes("en-GB") && v.name.toLowerCase().includes("female")
+        ) ||
+        voices.find((v) => v.lang.includes("en-GB")) ||
+        voices[0];
+      utterance.pitch = 1.1;
+      utterance.rate = 0.9;
+      utterance.onstart = () => {
+        setIsSpeaking(true);
+        setIsListening(false);
+      };
+
+      utterance.onend = () => {
+        setIsSpeaking(false);
+        setIsListening(true);
+      };
+      window.speechSynthesis.speak(utterance);
     };
 
     // Message to be read out
