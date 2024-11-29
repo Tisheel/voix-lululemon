@@ -213,30 +213,57 @@ const TemporarySearch = ({ onSearch }) => {
   }, []);
 
   return (
-    <div className="flex flex-col space-y-4">
-      {/* <form onSubmit={handleSubmit} className="flex items-center space-x-2">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={handleInputChange}
-          placeholder="Search or ask about products..."
-          className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          type="submit"
-          className="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600"
-        >
-          Search
-        </button>
-      </form> */}
-      <p><strong>Status:</strong> {isListening ? "Listening..." : "Not Listening"}</p> {/* Show listening status */}
-      <p><strong>Transcription:</strong> {transcript || "Speak something..."}</p> {/* Display the transcript */}
-      {aiResponse && (
-        <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-          <p className="text-gray-700">{aiResponse}</p>
-        </div>
-      )}
+    // <div className="flex flex-col space-y-4">
+    //   {/* <form onSubmit={handleSubmit} className="flex items-center space-x-2">
+    //     <input
+    //       type="text"
+    //       value={searchTerm}
+    //       onChange={handleInputChange}
+    //       placeholder="Search or ask about products..."
+    //       className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    //     />
+    //     <button
+    //       type="submit"
+    //       className="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600"
+    //     >
+    //       Search
+    //     </button>
+    //   </form> */}
+    //   <p><strong>Status:</strong> {isListening ? "Listening..." : "Not Listening"}</p> {/* Show listening status */}
+    //   <p><strong>Transcription:</strong> {transcript || "Speak something..."}</p> {/* Display the transcript */}
+    //   {aiResponse && (
+    //     <div className="mt-4 p-4 bg-gray-100 rounded-lg">
+    //       <p className="text-gray-700">{aiResponse}</p>
+    //     </div>
+    //   )}
+    // </div>
+
+    <div
+      className={`absolute bottom-4 right-4 w-16 h-16 rounded-full flex items-center justify-center bg-yellow-500 text-white shadow-lg ${isListening ? "animate-wave" : ""
+        }`}
+    >
+      <p className="text-center text-sm">
+        {isListening ? "🎤" : "🔇"} {/* Microphone icon for listening */}
+      </p>
+
+      <style>
+        {`
+      @keyframes wave {
+        0%, 100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      .animate-wave {
+        animation: wave 1.5s ease-in-out infinite;
+      }
+    `}
+      </style>
     </div>
+
   );
 };
 
