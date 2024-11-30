@@ -6,7 +6,7 @@ import { BASE_URL } from "../urls/urls";
 
 // Gemini API initialization
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const genAI = new GoogleGenerativeAI("AIzaSyCAUsw6x2fBnBseE5BazF0F-cwKAtO5Tic");
+const genAI = new GoogleGenerativeAI("AIzaSyDj4YHEMjddEOTxlyfgdM4eu2glzCHQsFI");
 
 const Voice = () => {
   const [initialized, setInitialized] = useState(false);
@@ -66,6 +66,20 @@ const Voice = () => {
               query: {
                 type: "string",
                 description: "The search query for the specific product",
+              },
+            },
+            required: ["query"],
+          },
+        },
+        {
+          name: "filterInteraction",
+          description: "Apply filters to the current product list",
+          parameters: {
+            type: "object",
+            properties: {
+              query: {
+                type: "string",
+                description: "The filter message containing filter criteria",
               },
             },
             required: ["query"],
@@ -138,6 +152,10 @@ const Voice = () => {
       case "particularSearch":
         await particularSearch(args.query);
         break;
+      case "filterInteraction":
+        console.log("here too");
+        await filterInteraction(args.query);
+        break;
       default:
         speakText("I couldn't perform that action.");
     }
@@ -175,71 +193,76 @@ const Voice = () => {
   };
 
   const filterInteraction = async (query) => {
-    const response = axios.get("/filter_conversationalist", {
+    const response = await axios.get(BASE_URL + "filter_conversationalist/", {
       params: {
         filterMsg: query,
       },
     });
+    console.log(response);
+    speakText(response.data.message);
   };
 
   useEffect(() => {
     const annyangInitiation = async () => {
       if (annyang) {
-        const commands = {
-          "Hey nova": () => speakText("Hello! How can I help you?"),
-          // GROUP SEARCH COMMANDS  ---------------------------------------------------
-          "*anything show *term": (anything, term) => groupSearch(term),
-          "*anything show me *term": (anything, term) => groupSearch(term),
-          "*anything are available *term": (anything, term) =>
-            groupSearch(term),
-          "*anything what are available *term": (anything, term) =>
-            groupSearch(term),
-          "*anything search *term": (anything, term) => groupSearch(term),
-          "*anything search for *term": (anything, term) => groupSearch(term),
-          "*anything find *term": (anything, term) => groupSearch(term),
-          "*anything find me *term": (anything, term) => groupSearch(term),
-          "*anything look for *term": (anything, term) => groupSearch(term),
-          "*anything look up *term": (anything, term) => groupSearch(term),
-          "*anything show results for *term": (anything, term) =>
-            groupSearch(term),
-          "*anything what *term": (anything, term) => groupSearch(term),
-          "*anything which *term": (anything, term) => groupSearch(term),
-          "*anything where can I find *term": (anything, term) =>
-            groupSearch(term),
-          "*anything do you have *term": (anything, term) => groupSearch(term),
-          "*anything is there *term": (anything, term) => groupSearch(term),
-          "*anything can I see *term": (anything, term) => groupSearch(term),
-          "*anything get me *term": (anything, term) => groupSearch(term),
-          "*anything show all *term": (anything, term) => groupSearch(term),
-          "*anything any *term available": (anything, term) =>
-            groupSearch(term),
-          "*anything list *term": (anything, term) => groupSearch(term),
-          "*anything list all *term": (anything, term) => groupSearch(term),
-          "*anything display *term": (anything, term) => groupSearch(term),
-          "*anything display all *term": (anything, term) => groupSearch(term),
-          "*anything search up *term": (anything, term) => groupSearch(term),
-          "*anything can you show me *term": (anything, term) =>
-            groupSearch(term),
-          "*anything give me *term": (anything, term) => groupSearch(term),
-          "*anything find results for *term": (anything, term) =>
-            groupSearch(term),
-          "*anything help me find *term": (anything, term) => groupSearch(term),
-          //GROUP SEARCH COMMANDS ------------------------------------------------------
+        // const commands = {
+        //   "Hey nova": () => speakText("Hello! How can I help you?"),
+        //   // GROUP SEARCH COMMANDS  ---------------------------------------------------
+        //   // "*anything show *term": (anything, term) => groupSearch(term),
+        //   // "*anything show me *term": (anything, term) => groupSearch(term),
+        //   // "*anything are available *term": (anything, term) =>
+        //   //   groupSearch(term),
+        //   // "*anything what are available *term": (anything, term) =>
+        //   //   groupSearch(term),
+        //   // "*anything search *term": (anything, term) => groupSearch(term),
+        //   // "*anything search for *term": (anything, term) => groupSearch(term),
+        //   // "*anything find *term": (anything, term) => groupSearch(term),
+        //   // "*anything find me *term": (anything, term) => groupSearch(term),
+        //   // "*anything look for *term": (anything, term) => groupSearch(term),
+        //   // "*anything look up *term": (anything, term) => groupSearch(term),
+        //   // "*anything show results for *term": (anything, term) =>
+        //   //   groupSearch(term),
+        //   // "*anything what *term": (anything, term) => groupSearch(term),
+        //   // "*anything which *term": (anything, term) => groupSearch(term),
+        //   // "*anything where can I find *term": (anything, term) =>
+        //   //   groupSearch(term),
+        //   // "*anything do you have *term": (anything, term) => groupSearch(term),
+        //   // "*anything is there *term": (anything, term) => groupSearch(term),
+        //   // "*anything can I see *term": (anything, term) => groupSearch(term),
+        //   // "*anything get me *term": (anything, term) => groupSearch(term),
+        //   // "*anything show all *term": (anything, term) => groupSearch(term),
+        //   // "*anything any *term available": (anything, term) =>
+        //   //   groupSearch(term),
+        //   // "*anything list *term": (anything, term) => groupSearch(term),
+        //   // "*anything list all *term": (anything, term) => groupSearch(term),
+        //   // "*anything display *term": (anything, term) => groupSearch(term),
+        //   // "*anything display all *term": (anything, term) => groupSearch(term),
+        //   // "*anything search up *term": (anything, term) => groupSearch(term),
+        //   // "*anything can you show me *term": (anything, term) =>
+        //   //   groupSearch(term),
+        //   // "*anything give me *term": (anything, term) => groupSearch(term),
+        //   // "*anything find results for *term": (anything, term) =>
+        //   //   groupSearch(term),
+        //   // "*anything help me find *term": (anything, term) => groupSearch(term),
+        //   //GROUP SEARCH COMMANDS ------------------------------------------------------
 
-          //PREVIOUS PAGE -------------------------------------------------------------
-          "*something1 previous page": () => navigate(-1),
-          // -------------------------------------------------------------------------
-          // ADD ITEMS TO CART --------------------------------------------------------
-          "add *item cart": (item) => addToCart(item),
-          // --------------------------------------------------------------------------
-          // SCROLL COMMANDS ----------------------------------------------------------
-          "scroll down": () => window.scrollBy(0, 300), // Scroll down by 300px
-          "scroll up": () => window.scrollBy(0, -300), // Scroll up by 300px
-          //-----------------------------------------------------------------------------
-          "*text1 filter *text2": (text1, text2) => {},
-        };
+        //   //PREVIOUS PAGE -------------------------------------------------------------
+        //   "*something1 previous page": () => navigate(-1),
+        //   // -------------------------------------------------------------------------
+        //   // ADD ITEMS TO CART --------------------------------------------------------
+        //   "add *item cart": (item) => addToCart(item),
+        //   // --------------------------------------------------------------------------
+        //   // SCROLL COMMANDS ----------------------------------------------------------
+        //   "scroll down": () => window.scrollBy(0, 300), // Scroll down by 300px
+        //   "scroll up": () => window.scrollBy(0, -300), // Scroll up by 300px
+        //   //-----------------------------------------------------------------------------
+        //   "*text1 filter *text2": (text1, text2) => {
+        //     filterInteraction(text1 + text2);
+        //     console.log("here");
+        //   },
+        // };
 
-        annyang.addCommands(commands);
+        // annyang.addCommands(commands);
 
         annyang.addCallback("resultNoMatch", (userSaid) => {
           setTranscript(userSaid[0]);
@@ -251,8 +274,6 @@ const Voice = () => {
         annyang.addCallback("end", () => setIsListening(false));
 
         annyang.setLanguage("en-US");
-        // annyang.start({ autoRestart: true, continuous: false });
-        // annyang.abort();
       }
     };
     annyangInitiation();
@@ -277,6 +298,7 @@ const Voice = () => {
           );
           console.log(product_list_response.data.message);
           speakText(product_list_response.data.message);
+          break;
         case "/product":
           alert("Viewing Product Details");
           break;
