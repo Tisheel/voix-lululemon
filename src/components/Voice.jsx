@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import annyang from "annyang";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { BASE_URL } from "../urls/urls";
 
 // Gemini API initialization
@@ -14,6 +14,7 @@ const Voice = () => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Gemini model setup
   const model = genAI.getGenerativeModel({
@@ -102,7 +103,6 @@ const Voice = () => {
   };
 
   const handleUnrecognizedCommand = async (userQuery) => {
-    //speakText("I didn't understand that. Let me check.");
     try {
       const result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: userQuery }] }],
@@ -115,7 +115,6 @@ const Voice = () => {
       if (functionCall) {
         executeGeminiFunction(functionCall);
       } else {
-        speakText("Sorry, I couldn't find an appropriate action.");
       }
     } catch (error) {
       console.error("Gemini error:", error);
@@ -175,8 +174,12 @@ const Voice = () => {
     }
   };
 
-  const getFilters = async (query) => {
-    const prompt = "";
+  const filterInteraction = async (query) => {
+    const response = axios.get("/filter_conversationalist", {
+      params: {
+        filterMsg: query,
+      },
+    });
   };
 
   useEffect(() => {
@@ -222,32 +225,6 @@ const Voice = () => {
             groupSearch(term),
           "*anything help me find *term": (anything, term) => groupSearch(term),
           //GROUP SEARCH COMMANDS ------------------------------------------------------
-          //PARTICULAR SEARCH COMMANDS -------------------------------------------------
-          "*anything tell me about the *product": (anything, product) =>
-            particularSearch(product),
-          "*anything tell me about *product": (anything, product) =>
-            particularSearch(product),
-          "*anything can you show me *product": (anything, product) =>
-            particularSearch(product),
-          "*anything what can you tell me about *product": (
-            anything,
-            product
-          ) => particularSearch(product),
-          "*anything what is *product": (anything, product) =>
-            particularSearch(product),
-          "*anything do you have *product": (anything, product) =>
-            particularSearch(product),
-          "*anything I want to know about *product": (anything, product) =>
-            particularSearch(product),
-          "*anything show me *product": (anything, product) =>
-            particularSearch(product),
-          "*anything can you give me details about *product": (
-            anything,
-            product
-          ) => particularSearch(product),
-          "*anything tell me more about *product": (anything, product) =>
-            particularSearch(product),
-          //----------------------------------------------------------------------------
 
           //PREVIOUS PAGE -------------------------------------------------------------
           "*something1 previous page": () => navigate(-1),
@@ -258,6 +235,8 @@ const Voice = () => {
           // SCROLL COMMANDS ----------------------------------------------------------
           "scroll down": () => window.scrollBy(0, 300), // Scroll down by 300px
           "scroll up": () => window.scrollBy(0, -300), // Scroll up by 300px
+          //-----------------------------------------------------------------------------
+          "*text1 filter *text2": (text1, text2) => {},
         };
 
         annyang.addCommands(commands);
@@ -278,6 +257,38 @@ const Voice = () => {
     };
     annyangInitiation();
   }, []);
+
+  useEffect(() => {
+    const interactivityEnabler = async () => {
+      switch (location.pathname) {
+        case "/":
+          const home_response = await axios.get(
+            BASE_URL + "home_page_conversationalist"
+          );
+          console.log(home_response.data.message);
+          speakText(home_response.data.message);
+          break;
+        case "/products":
+          const urlParams = new URLSearchParams(window.location.search);
+          const searchQuery = urlParams.get("search") || "";
+          const product_list_response = await axios.get(
+            BASE_URL + "product_list_page_conversationalist",
+            { params: { search: searchQuery } }
+          );
+          console.log(product_list_response.data.message);
+          speakText(product_list_response.data.message);
+        case "/product":
+          alert("Viewing Product Details");
+          break;
+        case "/cart":
+          alert("Checking out Cart");
+          break;
+        default:
+          alert("Navigated to a new page");
+      }
+    };
+    interactivityEnabler();
+  }, [location]);
 
   // useEffect(() => {
   //   const speakWelcomeMessage = () => {

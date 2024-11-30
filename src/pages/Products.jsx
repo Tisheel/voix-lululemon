@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import ProductCard from "../components/ProductCard";
 import axios from "axios";
 import { BASE_URL } from "../urls/urls";
-import { useLocation } from "react-router-dom"; // Import useLocation
+import { useLocation } from "react-router-dom";
 
 const ProductsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
