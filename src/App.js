@@ -6,12 +6,10 @@ import Home from "./pages/Home";
 import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
-import TemporarySearch from "./components/TemporarySearch";
 import Voice from "./components/Voice";
 
 const App = () => (
   <Router>
-    {/* <TemporarySearch /> */}
     <Voice />
     <Navbar />
     <Routes>

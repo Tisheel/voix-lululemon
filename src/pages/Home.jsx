@@ -1,41 +1,6 @@
 import React, { useEffect, useState } from "react";
 
 const HomePage = () => {
-  const [speechStarted, setSpeechStarted] = useState(false);
-  useEffect(() => {
-    const speakText = (text) => {
-      if (!("speechSynthesis" in window)) return;
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      const voices = window.speechSynthesis.getVoices();
-      utterance.voice =
-        voices.find(
-          (v) =>
-            v.lang.includes("en-GB") && v.name.toLowerCase().includes("female")
-        ) ||
-        voices.find((v) => v.lang.includes("en-GB")) ||
-        voices[0];
-      utterance.pitch = 1.1;
-      utterance.rate = 0.9;
-      utterance.onstart = () => {
-        setIsSpeaking(true);
-        setIsListening(false);
-      };
-
-      utterance.onend = () => {
-        setIsSpeaking(false);
-        setIsListening(true);
-      };
-      window.speechSynthesis.speak(utterance);
-    };
-
-    // Message to be read out
-    const welcomeMessage =
-      "Welcome to Lululemon. I am VOI, your personal voice assistant. Are you looking for a list of products or do you have something specific in your mind?";
-
-    speakMessage(welcomeMessage);
-  }, []); // Empty dependency array to ensure this runs only once on page load
-
   return (
     <div className="container mx-auto">
       {/* Banner Section */}

@@ -1,7 +1,9 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const ProductCard = ({ product }) => {
   const { id, name, color, price, image1_url } = product;
+  const navigate = useNavigate();
 
   return (
     <div className="">
@@ -20,7 +22,7 @@ const ProductCard = ({ product }) => {
       {/* Action */}
       <button
         className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
-        onClick={() => (window.location.href = `/product/${name}`)}
+        onClick={() => navigate("/product?search=" + encodeURIComponent(name))}
       >
         View Details
       </button>
