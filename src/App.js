@@ -7,18 +7,23 @@ import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Voice from "./components/Voice";
+import VoiceContextProvider from "./components/VoiceContextProvider";
+import ImageSearch from "./pages/ImageSearch";
 
 const App = () => (
   <Router>
-    <Voice />
-    <Navbar />
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/products" element={<Products />} />
-      <Route path="/product" element={<ProductDetails />} />
-      <Route path="/cart" element={<Cart />} />
-    </Routes>
-    <Footer />
+    <VoiceContextProvider>
+      <Voice />
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/product" element={<ProductDetails />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/imageSearch" element={<ImageSearch />} />
+      </Routes>
+      <Footer />
+    </VoiceContextProvider>
   </Router>
 );
 

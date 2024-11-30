@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import ProductCard from "../components/ProductCard";
 import axios from "axios";
 import { BASE_URL } from "../urls/urls";
 import { useLocation } from "react-router-dom"; // Import useLocation
+import VoiceContext from "../components/VoiceContext";
 
 const ProductsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -13,6 +14,8 @@ const ProductsPage = () => {
   const [products, setProducts] = useState([]);
 
   const location = useLocation();
+
+  const { filters } = useContext(VoiceContext)
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -39,6 +42,45 @@ const ProductsPage = () => {
 
     fetchProducts();
   }, [location.search]);
+
+  useEffect(() => {
+    if (!filters) return
+
+    const words = filters.split(" ").map(word => {
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    }); // Split filter string into words
+    let colors = [];
+    let categories = [];
+    let genders = [];
+    let fits = [];
+
+    console.log(words)
+
+    words.forEach((word) => {
+      if (allColors.includes(word)) {
+        colors.push(word);
+      }
+      if (allCategories.includes(word)) {
+        categories.push(word);
+      }
+      if (allGenders.includes(word)) {
+        genders.push(word);
+      }
+      if (allFits.includes(word)) {
+        fits.push(word);
+      }
+    });
+
+    console.log(colors, genders, fits, categories)
+
+    // Update state with the selected filters
+    setSelectedColors(colors);
+    setSelectedCategories(categories);
+    setSelectedGenders(genders);
+    setSelectedFits(fits);
+
+  }, [filters])
+
   // Extract unique filter values
   const allColors = Array.from(new Set(products.map((p) => p.color)));
   const allCategories = Array.from(new Set(products.map((p) => p.category)));
@@ -103,11 +145,10 @@ const ProductsPage = () => {
               {allColors.map((color) => (
                 <button
                   key={color}
-                  className={`px-4 py-2 border rounded ${
-                    selectedColors.includes(color)
-                      ? "border-blue-500 text-blue-500"
-                      : "border-gray-300 text-gray-700"
-                  }`}
+                  className={`px-4 py-2 border rounded ${selectedColors.includes(color)
+                    ? "border-blue-500 text-blue-500"
+                    : "border-gray-300 text-gray-700"
+                    }`}
                   onClick={() => toggleSelection(color, setSelectedColors)}
                 >
                   {color}

@@ -1,6 +1,6 @@
 export const products = [
   {
-    "id": 27,
+    "id": 26,
     "name": "Love Tank Top",
     "color": "White",
     "price": "380.00",
