@@ -6,7 +6,7 @@ import { BASE_URL } from "../urls/urls";
 
 // Gemini API initialization
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const genAI = new GoogleGenerativeAI("AIzaSyC790YH5_TEvVsYVMucY-71Tl7rLXDbwHA");
+const genAI = new GoogleGenerativeAI("AIzaSyD8UfB_I1fOl9nDkAY3Z8u6a_sHm8lAnEQ");
 
 const Voice = () => {
   const [initialized, setInitialized] = useState(false);
@@ -108,9 +108,13 @@ const Voice = () => {
           parameters: {
             type: "object",
             properties: {
-              // No specific properties required for this function
+              query: {
+                type: "string",
+                description:
+                  "The search query containing criteria to fetch product descriptions.",
+              },
             },
-            required: [], // No required parameters
+            required: ["query"],
           },
         },
       ],
