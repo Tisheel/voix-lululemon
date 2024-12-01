@@ -6,9 +6,9 @@ import { BASE_URL } from "../urls/urls";
 
 // Gemini API initialization
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const genAI = new GoogleGenerativeAI("AIzaSyD8UfB_I1fOl9nDkAY3Z8u6a_sHm8lAnEQ");
+const genAI = new GoogleGenerativeAI("AIzaSyC1fTExs1RW4FQ2ZiscaPB0BbJDnRl17SM");
 
-const Voice = () => {
+const Voice = ({ setFilters }) => {
   const [initialized, setInitialized] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -24,13 +24,13 @@ const Voice = () => {
         {
           name: "addToCart",
           description: "Add an item to the shopping cart",
-          // parameters: {
-          //   type: "object",
-          //   properties: {
-          //     query: { type: "string", description: "The item to add" },
-          //   },
-          //   required: ["query"],
-          // },
+          parameters: {
+            type: "object",
+            properties: {
+              query: { type: "string", description: "The item to add" },
+            },
+            required: ["query"],
+          },
         },
         {
           name: "groupSearch",
@@ -104,7 +104,23 @@ const Voice = () => {
         {
           name: "recommendProducts",
           description:
-            "Recommend products based on user preferences or popular items. This function is called when the user requests product recommendations without providing any details. If details are provided use the groupSearch or particularSearch appropriately. ",
+            "Recommend products based on user preferences or popular items. This function is called when the user requests product recommendations without providing any details. If details are provided use the groupSearch or particularSearch appropriately.",
+          parameters: {
+            type: "object",
+            properties: {
+              query: {
+                type: "string",
+                description:
+                  "The search query containing criteria to fetch product descriptions.",
+              },
+            },
+            required: ["query"],
+          },
+        },
+        {
+          name: "resetFilters",
+          description:
+            "Reset all applied filters to their default state. This function is called when the user requests to clear all filters without providing any specific details. It ensures that the product list is displayed without any filtering criteria.",
           parameters: {
             type: "object",
             properties: {
@@ -149,7 +165,6 @@ const Voice = () => {
   };
 
   const handleUnrecognizedCommand = async (userQuery) => {
-    console.log(userQuery);
     try {
       const result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: userQuery }] }],
@@ -161,11 +176,10 @@ const Voice = () => {
 
       if (functionCall) {
         executeGeminiFunction(functionCall);
-      } else {
       }
     } catch (error) {
       console.error("Gemini error:", error);
-      speakText("An error occurred while processing your request.");
+      // speakText("An error occurred while processing your request.");
     }
   };
 
@@ -186,19 +200,23 @@ const Voice = () => {
         await particularSearch(args.query);
         break;
       case "filterInteraction":
-        console.log("here too");
         await filterInteraction(args.query);
         break;
-      case "fetchProductDescriptionOrDetails":
+      case "fetchProductDescription":
         await fetchProductDescription(args.query);
         break;
       case "recommendProducts":
         await getRecommendations();
         break;
+      case "resetFilters":
+        await resetFilters();
+        break;
       default:
+        speakText("I couldn't perform that action.");
     }
   };
 
+  // Functions to execute specific commands
   const groupSearch = (query) => {
     navigate(`/products?search=${encodeURIComponent(query)}`);
   };
@@ -215,11 +233,10 @@ const Voice = () => {
     );
   };
   const particularSearch = async (query) => {
-    if (location)
-      navigate({
-        pathname: "/product",
-        search: `?search=${encodeURIComponent(query)}`,
-      });
+    navigate({
+      pathname: "/product",
+      search: `?search=${encodeURIComponent(query)}`,
+    });
     annyang.abort();
     speakText(
       `Here are the details you asked for. Do you wanna know more about the product. `
@@ -229,7 +246,7 @@ const Voice = () => {
 
   const finalizeCart = async (confirmation) => {
     if (confirmation) {
-      await axios.get(`${BASE_URL}finalize_cart/`);
+      await axios.get(`/finalize_cart/`);
       speakText("Your cart has been finalized.");
     } else {
       speakText("Cart finalization canceled.");
@@ -243,6 +260,7 @@ const Voice = () => {
       },
     });
     console.log(response);
+    setFilters(response.data.filters);
     speakText(response.data.message);
   };
 
@@ -259,6 +277,11 @@ const Voice = () => {
 
   const getRecommendations = async () => {
     navigate("/recommendation");
+  };
+
+  const resetFilters = async () => {
+    const response = await axios.get(`${BASE_URL}filter_reset/`);
+    setFilters([]);
   };
 
   useEffect(() => {
@@ -320,10 +343,11 @@ const Voice = () => {
         //     console.log("here");
         //   },
         // };
-
         const commands = {
           "*text1 description": () => fetchProductDescription(),
-          "*something1 previous page": () => navigate(-1),
+          "scroll down": () => window.scrollBy(0, 300), // Scroll down by 300px
+          "scroll up": () => window.scrollBy(0, -300), // Scroll up by 300px
+          "*text previous page": () => navigate(-1),
         };
 
         annyang.addCommands(commands);
@@ -374,6 +398,7 @@ const Voice = () => {
           speakText(product_details_response.data.message);
           break;
         case "/cart":
+          alert("Checking out Cart");
           break;
         default:
         // alert("Navigated to a new page");

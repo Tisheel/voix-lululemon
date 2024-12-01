@@ -4,7 +4,7 @@ import axios from "axios";
 import { BASE_URL } from "../urls/urls";
 import { useLocation } from "react-router-dom";
 
-const ProductsPage = () => {
+const ProductsPage = ({ filters }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -45,11 +45,51 @@ const ProductsPage = () => {
   const allGenders = Array.from(new Set(products.map((p) => p.gender)));
   const allFits = Array.from(new Set(products.map((p) => p.fit)));
 
+  useEffect(() => {
+    console.log(filters);
+    // If filters is null, undefined, or an empty array, reset all selections
+    if (!filters || filters.length === 0) {
+      setSelectedColors([]);
+      setSelectedCategories([]);
+      setSelectedGenders([]);
+      setSelectedFits([]);
+      return; // Exit the effect
+    }
+
+    // Reset selections before applying new filters
+    setSelectedColors([]);
+    setSelectedCategories([]);
+    setSelectedGenders([]);
+    setSelectedFits([]);
+
+    // Apply filters
+    filters?.forEach((filter) => {
+      if (allColors.includes(filter)) {
+        setSelectedColors((prev) => [...prev, filter]);
+      }
+      if (allCategories.includes(filter)) {
+        setSelectedCategories((prev) => [...prev, filter]);
+      }
+      if (allGenders.includes(filter)) {
+        setSelectedGenders((prev) => [...prev, filter]);
+      }
+      if (allFits.includes(filter)) {
+        setSelectedFits((prev) => [...prev, filter]);
+      }
+    });
+  }, [filters, products]);
+
   //Filtering logic
   const filteredProducts = products.filter((product) => {
-    // const matchesSearch =
-    //   product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    //   product.description.toLowerCase().includes(searchQuery.toLowerCase());
+    // If no filters are selected, show all products
+    if (
+      selectedColors.length === 0 &&
+      selectedCategories.length === 0 &&
+      selectedGenders.length === 0 &&
+      selectedFits.length === 0
+    ) {
+      return true;
+    }
 
     const matchesColors =
       selectedColors.length === 0 || selectedColors.includes(product.color);
@@ -64,12 +104,8 @@ const ProductsPage = () => {
     const matchesFits =
       selectedFits.length === 0 || selectedFits.includes(product.fit);
 
-    return (
-      // matchesSearch &&
-      matchesColors && matchesCategories && matchesGenders && matchesFits
-    );
+    return matchesColors && matchesCategories && matchesGenders && matchesFits;
   });
-
   // Toggle filter selection
   const toggleSelection = (value, setSelected) => {
     setSelected((prev) =>
