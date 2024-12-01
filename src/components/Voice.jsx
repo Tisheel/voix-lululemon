@@ -85,6 +85,22 @@ const Voice = () => {
             required: ["query"],
           },
         },
+        {
+          name: "fetchProductDescription",
+          description:
+            "Fetch product descriptions based on the provided search query for a particular product.",
+          parameters: {
+            type: "object",
+            properties: {
+              query: {
+                type: "string",
+                description:
+                  "The search query containing criteria to fetch product descriptions.",
+              },
+            },
+            required: ["query"],
+          },
+        },
       ],
     },
   });
@@ -156,6 +172,9 @@ const Voice = () => {
         console.log("here too");
         await filterInteraction(args.query);
         break;
+      case "fetchProductDescription":
+        await fetchProductDescription(args.query);
+        break;
       default:
         speakText("I couldn't perform that action.");
     }
@@ -198,6 +217,19 @@ const Voice = () => {
         filterMsg: query,
       },
     });
+    console.log(response);
+    speakText(response.data.message);
+  };
+
+  const fetchProductDescription = async (query) => {
+    const response = await axios.get(
+      BASE_URL + "product_description_conversationalist/",
+      {
+        params: {
+          filterMsg: query,
+        },
+      }
+    );
     console.log(response);
     speakText(response.data.message);
   };
@@ -290,17 +322,24 @@ const Voice = () => {
           speakText(home_response.data.message);
           break;
         case "/products":
-          const urlParams = new URLSearchParams(window.location.search);
-          const searchQuery = urlParams.get("search") || "";
+          const urlParamsList = new URLSearchParams(window.location.search);
+          const searchQueryList = urlParamsList.get("search") || "";
           const product_list_response = await axios.get(
             BASE_URL + "product_list_page_conversationalist",
-            { params: { search: searchQuery } }
+            { params: { search: searchQueryList } }
           );
           console.log(product_list_response.data.message);
           speakText(product_list_response.data.message);
           break;
         case "/product":
-          alert("Viewing Product Details");
+          const urlParamsDetails = new URLSearchParams(window.location.search);
+          const searchQueryDetails = urlParamsDetails.get("search") || "";
+          const product_details_response = await axios.get(
+            BASE_URL + "product_details_page_conversationalist",
+            { params: { search: searchQueryDetails } }
+          );
+          console.log(product_details_response);
+          speakText(product_details_response.data.message);
           break;
         case "/cart":
           alert("Checking out Cart");
@@ -312,22 +351,6 @@ const Voice = () => {
     interactivityEnabler();
   }, [location]);
 
-  // useEffect(() => {
-  //   const speakWelcomeMessage = () => {
-  //     if (window.speechSynthesis.getVoices().length > 0) {
-  //       speakText(
-  //         "Welcome to lulu lemon, I am voi your personal voice assistant. Are you looking for a list of products or do you have something specific in your mind?"
-  //       );
-  //     } else {
-  //       window.speechSynthesis.onvoiceschanged = () => {
-  //         speakText(
-  //           "Welcome to lulu lemon, I am voi your personal voice assistant. Are you looking for a list of products or do you have something specific in your mind?"
-  //         );
-  //       };
-  //     }
-  //   };
-  //   setTimeout(speakWelcomeMessage, 500);
-  // }, []);
   const handleButtonClick = () => {
     if (!isListening) {
       annyang.start({ autoRestart: true, continuous: false });
