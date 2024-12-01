@@ -6,7 +6,7 @@ import { BASE_URL } from "../urls/urls";
 
 // Gemini API initialization
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const genAI = new GoogleGenerativeAI("AIzaSyDj4YHEMjddEOTxlyfgdM4eu2glzCHQsFI");
+const genAI = new GoogleGenerativeAI("AIzaSyC790YH5_TEvVsYVMucY-71Tl7rLXDbwHA");
 
 const Voice = () => {
   const [initialized, setInitialized] = useState(false);
@@ -24,13 +24,13 @@ const Voice = () => {
         {
           name: "addToCart",
           description: "Add an item to the shopping cart",
-          parameters: {
-            type: "object",
-            properties: {
-              query: { type: "string", description: "The item to add" },
-            },
-            required: ["query"],
-          },
+          // parameters: {
+          //   type: "object",
+          //   properties: {
+          //     query: { type: "string", description: "The item to add" },
+          //   },
+          //   required: ["query"],
+          // },
         },
         {
           name: "groupSearch",
@@ -99,6 +99,18 @@ const Voice = () => {
               },
             },
             required: ["query"],
+          },
+        },
+        {
+          name: "recommendProducts",
+          description:
+            "Recommend products based on user preferences or popular items. This function is called when the user requests product recommendations without providing any details. If details are provided use the groupSearch or particularSearch appropriately. ",
+          parameters: {
+            type: "object",
+            properties: {
+              // No specific properties required for this function
+            },
+            required: [], // No required parameters
           },
         },
       ],
@@ -176,20 +188,27 @@ const Voice = () => {
       case "fetchProductDescriptionOrDetails":
         await fetchProductDescription(args.query);
         break;
+      case "recommendProducts":
+        await getRecommendations();
+        break;
       default:
-        speakText("I couldn't perform that action.");
     }
   };
 
-  // Functions to execute specific commands
   const groupSearch = (query) => {
     navigate(`/products?search=${encodeURIComponent(query)}`);
   };
 
   const addToCart = async (query) => {
-    await axios.get(`${BASE_URL}add_to_cart/`, { params: { q: query } });
+    const urlParamsCart = new URLSearchParams(window.location.search);
+    const searchQueryCart = urlParamsCart.get("search") || query;
+    await axios.get(`${BASE_URL}add_to_cart/`, {
+      params: { q: searchQueryCart },
+    });
     navigate("/cart");
-    speakText(`${query} has been added to your cart.`);
+    speakText(
+      `The products have been added to your cart. Do you want to checkout or do you want some recommendations. `
+    );
   };
   const particularSearch = async (query) => {
     if (location)
@@ -206,7 +225,7 @@ const Voice = () => {
 
   const finalizeCart = async (confirmation) => {
     if (confirmation) {
-      await axios.get(`/finalize_cart/`);
+      await axios.get(`${BASE_URL}finalize_cart/`);
       speakText("Your cart has been finalized.");
     } else {
       speakText("Cart finalization canceled.");
@@ -231,6 +250,11 @@ const Voice = () => {
       { params: { search: searchQuery } }
     );
     console.log(response);
+    speakText(response.data.message);
+  };
+
+  const getRecommendations = async () => {
+    navigate("/recommendation");
   };
 
   useEffect(() => {
@@ -295,6 +319,7 @@ const Voice = () => {
 
         const commands = {
           "*text1 description": () => fetchProductDescription(),
+          "*something1 previous page": () => navigate(-1),
         };
 
         annyang.addCommands(commands);
@@ -345,10 +370,9 @@ const Voice = () => {
           speakText(product_details_response.data.message);
           break;
         case "/cart":
-          alert("Checking out Cart");
           break;
         default:
-          // alert("Navigated to a new page");
+        // alert("Navigated to a new page");
       }
     };
     interactivityEnabler();
@@ -380,55 +404,55 @@ const Voice = () => {
       </div>
 
       <style jsx>{`
-      .circle {
-        width: 60px;
-        height: 60px;
-        background-color: black;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        position: relative;
-      }
-
-      .circle.listening {
-        background-color: transparent; /* Hide the black background */
-      }
-
-      .wavy {
-        display: flex;
-        gap: 4px;
-        position: absolute;
-      }
-
-      .cylinder {
-        width: 15px;
-        height: 30px;
-        background-color: black;
-        border-radius: 4px;
-        animation: wave 1.5s infinite;
-      }
-
-      .cylinder.delay-200 {
-        animation-delay: 0.2s;
-      }
-
-      .cylinder.delay-400 {
-        animation-delay: 0.4s;
-      }
-
-      @keyframes wave {
-        0%,
-        100% {
-          transform: scaleY(1);
+        .circle {
+          width: 60px;
+          height: 60px;
+          background-color: black;
+          border-radius: 50%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          position: relative;
         }
-        50% {
-          transform: scaleY(1.5);
+
+        .circle.listening {
+          background-color: transparent; /* Hide the black background */
         }
-      }
-    `}</style>
+
+        .wavy {
+          display: flex;
+          gap: 4px;
+          position: absolute;
+        }
+
+        .cylinder {
+          width: 15px;
+          height: 30px;
+          background-color: black;
+          border-radius: 4px;
+          animation: wave 1.5s infinite;
+        }
+
+        .cylinder.delay-200 {
+          animation-delay: 0.2s;
+        }
+
+        .cylinder.delay-400 {
+          animation-delay: 0.4s;
+        }
+
+        @keyframes wave {
+          0%,
+          100% {
+            transform: scaleY(1);
+          }
+          50% {
+            transform: scaleY(1.5);
+          }
+        }
+      `}</style>
     </div>
   );
 };
