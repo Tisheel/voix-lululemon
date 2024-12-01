@@ -4,7 +4,7 @@ import axios from "axios";
 import { BASE_URL } from "../urls/urls";
 import { useLocation } from "react-router-dom";
 
-const ProductsPage = () => {
+const ProductsPage = ({ filters }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -44,6 +44,24 @@ const ProductsPage = () => {
   const allCategories = Array.from(new Set(products.map((p) => p.category)));
   const allGenders = Array.from(new Set(products.map((p) => p.gender)));
   const allFits = Array.from(new Set(products.map((p) => p.fit)));
+
+  useEffect(() => {
+    console.log(filters)
+    filters?.forEach((filter) => {
+      if (allColors.includes(filter)) {
+        setSelectedColors([filter, ...selectedColors])
+      }
+      if (allCategories.includes(filter)) {
+        setSelectedCategories([filter, ...selectedCategories])
+      }
+      if (allGenders.includes(filter)) {
+        setSelectedGenders([filter, ...selectedGenders])
+      }
+      if (allFits.includes(filter)) {
+        setSelectedFits([filter, ...selectedFits])
+      }
+    })
+  }, [filters])
 
   //Filtering logic
   const filteredProducts = products.filter((product) => {
@@ -103,11 +121,10 @@ const ProductsPage = () => {
               {allColors.map((color) => (
                 <button
                   key={color}
-                  className={`px-4 py-2 border rounded ${
-                    selectedColors.includes(color)
-                      ? "border-blue-500 text-blue-500"
-                      : "border-gray-300 text-gray-700"
-                  }`}
+                  className={`px-4 py-2 border rounded ${selectedColors.includes(color)
+                    ? "border-blue-500 text-blue-500"
+                    : "border-gray-300 text-gray-700"
+                    }`}
                   onClick={() => toggleSelection(color, setSelectedColors)}
                 >
                   {color}
