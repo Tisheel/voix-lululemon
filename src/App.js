@@ -7,6 +7,8 @@ import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Voice from "./components/Voice";
+import ImageSearch from "./pages/ImageSearch";
+import RecommendationsPage from "./pages/Recommendation";
 
 const App = () => (
   <Router>
@@ -17,6 +19,8 @@ const App = () => (
       <Route path="/products" element={<Products />} />
       <Route path="/product" element={<ProductDetails />} />
       <Route path="/cart" element={<Cart />} />
+      <Route path="/image-search" element={<ImageSearch />} />
+      <Route path="/recommendation" element={<RecommendationsPage />} />
     </Routes>
     <Footer />
   </Router>

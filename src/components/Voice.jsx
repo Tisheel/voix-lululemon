@@ -345,7 +345,7 @@ const Voice = () => {
           alert("Checking out Cart");
           break;
         default:
-          alert("Navigated to a new page");
+          // alert("Navigated to a new page");
       }
     };
     interactivityEnabler();
@@ -361,17 +361,71 @@ const Voice = () => {
   };
 
   return (
-    <div>
-      <div className="fixed bottom-4 right-4 z-50 flex gap-4">
-        <button
-          onClick={handleButtonClick}
-          className={`${
-            isListening ? "bg-red-500" : "bg-green-500"
-          } text-white font-bold py-2 px-4 rounded`}
-        >
-          {isListening ? "Stop Listening" : "Start Listening"}
-        </button>
+    <div className="fixed bottom-4 right-4 z-50 flex justify-center items-center">
+      {/* Toggle Circle */}
+      <div
+        onClick={handleButtonClick} // Use handleButtonClick to toggle state
+        className={`circle ${isListening ? "listening" : ""}`}
+      >
+        {isListening && (
+          <div className="wavy">
+            <div className="cylinder delay-0"></div>
+            <div className="cylinder delay-200"></div>
+            <div className="cylinder delay-400"></div>
+          </div>
+        )}
       </div>
+
+      <style jsx>{`
+      .circle {
+        width: 60px;
+        height: 60px;
+        background-color: black;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        position: relative;
+      }
+
+      .circle.listening {
+        background-color: transparent; /* Hide the black background */
+      }
+
+      .wavy {
+        display: flex;
+        gap: 4px;
+        position: absolute;
+      }
+
+      .cylinder {
+        width: 15px;
+        height: 30px;
+        background-color: black;
+        border-radius: 4px;
+        animation: wave 1.5s infinite;
+      }
+
+      .cylinder.delay-200 {
+        animation-delay: 0.2s;
+      }
+
+      .cylinder.delay-400 {
+        animation-delay: 0.4s;
+      }
+
+      @keyframes wave {
+        0%,
+        100% {
+          transform: scaleY(1);
+        }
+        50% {
+          transform: scaleY(1.5);
+        }
+      }
+    `}</style>
     </div>
   );
 };
