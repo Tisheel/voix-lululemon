@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
+import annyang from "annyang"; // Import Annyang
 import { BASE_URL } from "../urls/urls"; // Assuming you have a base URL for the API
 
 const ProductDetails = () => {
@@ -10,6 +11,7 @@ const ProductDetails = () => {
   const [error, setError] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
+  const imageSliderRef = useRef(null); // Ref for the image slider
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -28,14 +30,12 @@ const ProductDetails = () => {
           params: { q: searchQuery },
         });
 
-        // Assuming the response structure is like the schema you provided
         const fetchedProduct = response.data.results;
 
-        // Modify the fetched product to have colors as an array
         const productWithColors = {
           ...fetchedProduct,
-          color: [fetchedProduct.color], // Convert single color to an array
-          sizes: ["S", "M", "L", "XL"], // Adding static sizes for now (this can be dynamic if needed)
+          color: [fetchedProduct.color],
+          sizes: ["S", "M", "L", "XL"],
         };
 
         setProduct(productWithColors);
@@ -49,6 +49,26 @@ const ProductDetails = () => {
 
     fetchProductDetails();
   }, [location.search]);
+
+  useEffect(() => {
+    if (annyang) {
+      const commands = {
+        "scroll left": () => {
+          imageSliderRef.current.scrollBy({ left: -200, behavior: "smooth" });
+        },
+        "scroll right": () => {
+          imageSliderRef.current.scrollBy({ left: 200, behavior: "smooth" });
+        },
+      };
+
+      annyang.addCommands(commands);
+      annyang.start();
+
+      return () => {
+        annyang.abort(); // Cleanup Annyang on component unmount
+      };
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -78,7 +98,10 @@ const ProductDetails = () => {
       <div className="flex flex-col md:flex-row">
         {/* Image Slider */}
         <div className="w-full md:w-1/2">
-          <div className="flex gap-4 overflow-x-scroll overflow-hidden">
+          <div
+            ref={imageSliderRef}
+            className="flex gap-4 overflow-x-scroll overflow-hidden"
+          >
             {[image1_url, image2_url, image3_url].map((image, index) => (
               <img
                 key={index}
@@ -125,7 +148,8 @@ const ProductDetails = () => {
                 {sizes.map((size, index) => (
                   <button
                     key={index}
-                    className={`w-12 h-12 flex justify-center items-center rounded-full border-2 border-gray-300 text-gray-800 font-semibold ${selectedSize === size ? "ring-2 ring-blue-500" : ""}`}
+                    className={`w-12 h-12 flex justify-center items-center rounded-full border-2 border-gray-300 text-gray-800 font-semibold ${selectedSize === size ? "ring-2 ring-blue-500" : ""
+                      }`}
                     onClick={() => setSelectedSize(size)}
                   >
                     {size}
