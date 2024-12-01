@@ -86,9 +86,9 @@ const Voice = () => {
           },
         },
         {
-          name: "fetchProductDescription",
+          name: "fetchProductDescriptionOrDetails",
           description:
-            "Fetch product descriptions based on the provided search query for a particular product.",
+            "Fetch descriptions or details based on the provided search query for a particular product after searching for particular product. If asked for more details execute this function. ",
           parameters: {
             type: "object",
             properties: {
@@ -133,6 +133,7 @@ const Voice = () => {
   };
 
   const handleUnrecognizedCommand = async (userQuery) => {
+    console.log(userQuery);
     try {
       const result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: userQuery }] }],
@@ -172,7 +173,7 @@ const Voice = () => {
         console.log("here too");
         await filterInteraction(args.query);
         break;
-      case "fetchProductDescription":
+      case "fetchProductDescriptionOrDetails":
         await fetchProductDescription(args.query);
         break;
       default:
@@ -191,10 +192,11 @@ const Voice = () => {
     speakText(`${query} has been added to your cart.`);
   };
   const particularSearch = async (query) => {
-    navigate({
-      pathname: "/product",
-      search: `?search=${encodeURIComponent(query)}`,
-    });
+    if (location)
+      navigate({
+        pathname: "/product",
+        search: `?search=${encodeURIComponent(query)}`,
+      });
     annyang.abort();
     speakText(
       `Here are the details you asked for. Do you wanna know more about the product. `
@@ -221,17 +223,14 @@ const Voice = () => {
     speakText(response.data.message);
   };
 
-  const fetchProductDescription = async (query) => {
+  const fetchProductDescription = async () => {
+    const urlparams = new URLSearchParams(window.location.search);
+    const searchQuery = urlparams.get("search") || "";
     const response = await axios.get(
       BASE_URL + "product_description_conversationalist/",
-      {
-        params: {
-          filterMsg: query,
-        },
-      }
+      { params: { search: searchQuery } }
     );
     console.log(response);
-    speakText(response.data.message);
   };
 
   useEffect(() => {
@@ -294,7 +293,11 @@ const Voice = () => {
         //   },
         // };
 
-        // annyang.addCommands(commands);
+        const commands = {
+          "*text1 description": () => fetchProductDescription(),
+        };
+
+        annyang.addCommands(commands);
 
         annyang.addCallback("resultNoMatch", (userSaid) => {
           setTranscript(userSaid[0]);
