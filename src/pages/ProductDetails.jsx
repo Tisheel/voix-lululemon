@@ -18,7 +18,7 @@ const ProductDetails = () => {
       try {
         setLoading(true);
         const params = new URLSearchParams(location.search);
-        const searchQuery = params.get("search");
+        const searchQuery = params.get("search-item");
 
         if (!searchQuery) {
           setError("No search query provided");
@@ -91,7 +91,16 @@ const ProductDetails = () => {
     );
   }
 
-  const { name, price, description, image1_url, image2_url, image3_url, color, sizes } = product;
+  const {
+    name,
+    price,
+    description,
+    image1_url,
+    image2_url,
+    image3_url,
+    color,
+    sizes,
+  } = product;
 
   return (
     <div className="container mx-auto py-12">
@@ -130,8 +139,9 @@ const ProductDetails = () => {
                 {color.map((col, index) => (
                   <button
                     key={index}
-                    className={`w-8 h-8 rounded-full border-2 border-gray-300 ${selectedColor === col ? "ring-2 ring-blue-500" : ""
-                      }`}
+                    className={`w-8 h-8 rounded-full border-2 border-gray-300 ${
+                      selectedColor === col ? "ring-2 ring-blue-500" : ""
+                    }`}
                     style={{ backgroundColor: col }}
                     onClick={() => setSelectedColor(col)}
                   ></button>
@@ -148,8 +158,9 @@ const ProductDetails = () => {
                 {sizes.map((size, index) => (
                   <button
                     key={index}
-                    className={`w-12 h-12 flex justify-center items-center rounded-full border-2 border-gray-300 text-gray-800 font-semibold ${selectedSize === size ? "ring-2 ring-blue-500" : ""
-                      }`}
+                    className={`w-12 h-12 flex justify-center items-center rounded-full border-2 border-gray-300 text-gray-800 font-semibold ${
+                      selectedSize === size ? "ring-2 ring-blue-500" : ""
+                    }`}
                     onClick={() => setSelectedSize(size)}
                   >
                     {size}

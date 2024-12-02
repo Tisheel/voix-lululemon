@@ -18,13 +18,12 @@ const model = genAI.getGenerativeModel({
         parameters: {
           type: "object",
           properties: {
-            placeholder: {
+            query: {
               type: "string",
-              description:
-                "A placeholder parameter when no specific parameters are needed",
+              description: "Name of the product to be added to the cart",
             },
           },
-          required: [], // No required parameters
+          required: [],
         },
       },
       {
@@ -143,6 +142,21 @@ const model = genAI.getGenerativeModel({
           required: [],
         },
       },
+      {
+        name: "thankAndDeliver",
+        description:
+          "If the user mentions a delivery location then call this function. ",
+        parameters: {
+          type: "object",
+          properties: {
+            placeholder: {
+              type: "string",
+              description: "A delivery location. ",
+            },
+          },
+          required: [],
+        },
+      },
     ],
   },
 });
@@ -234,6 +248,9 @@ const Voice = ({ setFilters }) => {
       case "searchByImage":
         await searchByImage();
         break;
+      case "thankAndDeliver":
+        await thankAndDeliveryDate();
+        break;
       default:
         speakText("I couldn't perform that action.");
     }
@@ -246,7 +263,7 @@ const Voice = ({ setFilters }) => {
 
   const addToCart = async (query) => {
     const urlParamsCart = new URLSearchParams(window.location.search);
-    const searchQueryCart = urlParamsCart.get("search") || query;
+    const searchQueryCart = urlParamsCart.get("search-item") || query;
     await axios.get(`${BASE_URL}add_to_cart/`, {
       params: { q: searchQueryCart },
     });
@@ -258,7 +275,7 @@ const Voice = ({ setFilters }) => {
   const particularSearch = async (query) => {
     navigate({
       pathname: "/product",
-      search: `?search=${encodeURIComponent(query)}`,
+      search: `?search-item=${encodeURIComponent(query)}`,
     });
     annyang.abort();
     speakText(
@@ -298,15 +315,28 @@ const Voice = ({ setFilters }) => {
 
   const getRecommendations = async () => {
     navigate("/recommendation");
+    const response = await axios.get(
+      `${BASE_URL}recommendations_conversationalist/`
+    );
+    console.log(response);
+    speakText(response.data.message);
   };
 
   const resetFilters = async () => {
     const response = await axios.get(`${BASE_URL}filter_reset/`);
+    speakText("The filters have been reset");
     setFilters([]);
   };
 
   const searchByImage = async () => {
     navigate("/image-search");
+  };
+
+  const thankAndDeliveryDate = async () => {
+    navigate("thank-you");
+    speakText(
+      "Your order has been placed. Your purchase will be delivered within 7 to 10 business days. Thanks for shopping with us."
+    );
   };
 
   useEffect(() => {
@@ -414,7 +444,7 @@ const Voice = ({ setFilters }) => {
           break;
         case "/product":
           const urlParamsDetails = new URLSearchParams(window.location.search);
-          const searchQueryDetails = urlParamsDetails.get("search") || "";
+          const searchQueryDetails = urlParamsDetails.get("search-item") || "";
           const product_details_response = await axios.get(
             BASE_URL + "product_details_page_conversationalist",
             { params: { search: searchQueryDetails } }
@@ -423,7 +453,11 @@ const Voice = ({ setFilters }) => {
           speakText(product_details_response.data.message);
           break;
         case "/cart":
-          alert("Checking out Cart");
+          const cart_response = await axios.get(
+            BASE_URL + "cart_conversationalist/"
+          );
+          console.log(cart_response);
+          speakText(cart_response.data.message);
           break;
         default:
         // alert("Navigated to a new page");

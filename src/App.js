@@ -9,6 +9,7 @@ import Cart from "./pages/Cart";
 import ImageSearch from "./pages/ImageSearch";
 import RecommendationsPage from "./pages/Recommendation";
 import Footer from "./components/Footer";
+import Thank from "./pages/Thank";
 
 const App = () => {
   // Add useState for filters
@@ -28,6 +29,7 @@ const App = () => {
         <Route path="/cart" element={<Cart />} />
         <Route path="/image-search" element={<ImageSearch />} />
         <Route path="/recommendation" element={<RecommendationsPage />} />
+        <Route path="/thank-you" element={<Thank />} />
       </Routes>
       <Footer />
     </Router>
