@@ -8,6 +8,145 @@ import { BASE_URL } from "../urls/urls";
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI("AIzaSyC1fTExs1RW4FQ2ZiscaPB0BbJDnRl17SM");
 
+const model = genAI.getGenerativeModel({
+  model: "gemini-1.5-flash",
+  tools: {
+    functionDeclarations: [
+      {
+        name: "addToCart",
+        description: "Add an item to the shopping cart",
+        parameters: {
+          type: "object",
+          properties: {
+            placeholder: {
+              type: "string",
+              description:
+                "A placeholder parameter when no specific parameters are needed",
+            },
+          },
+          required: [], // No required parameters
+        },
+      },
+      {
+        name: "groupSearch",
+        description: "Search for a group of products",
+        parameters: {
+          type: "object",
+          properties: {
+            query: { type: "string", description: "Search query" },
+          },
+          required: ["query"],
+        },
+      },
+      {
+        name: "finalizeCart",
+        description: "Finalize and checkout",
+        parameters: {
+          type: "object",
+          properties: {
+            confirmation: {
+              type: "boolean",
+              description: "Confirmation to finalize",
+            },
+          },
+          required: ["confirmation"],
+        },
+      },
+      {
+        name: "particularSearch",
+        description: "Search for a specific product and view its details",
+        parameters: {
+          type: "object",
+          properties: {
+            query: {
+              type: "string",
+              description: "The search query for the specific product",
+            },
+          },
+          required: ["query"],
+        },
+      },
+      {
+        name: "filterInteraction",
+        description: "Apply filters to the current product list",
+        parameters: {
+          type: "object",
+          properties: {
+            query: {
+              type: "string",
+              description: "The filter message containing filter criteria",
+            },
+          },
+          required: ["query"],
+        },
+      },
+      {
+        name: "fetchProductDescriptionOrDetails",
+        description:
+          "Fetch descriptions or details based on the provided search query for a particular product after searching for particular product. If asked for more details execute this function. ",
+        parameters: {
+          type: "object",
+          properties: {
+            query: {
+              type: "string",
+              description:
+                "The search query containing criteria to fetch product descriptions.",
+            },
+          },
+          required: ["query"],
+        },
+      },
+      {
+        name: "recommendProducts",
+        description:
+          "Recommend products based on user preferences or popular items. This function is called when the user requests product recommendations without providing any details. If details are provided use the groupSearch or particularSearch appropriately.",
+        parameters: {
+          type: "object",
+          properties: {
+            query: {
+              type: "string",
+              description:
+                "The search query containing criteria to fetch product descriptions.",
+            },
+          },
+          required: ["query"],
+        },
+      },
+      {
+        name: "resetFilters",
+        description:
+          "Reset all applied filters to their default state. This function is called when the user requests to clear all filters without providing any specific details. It ensures that the product list is displayed without any filtering criteria.",
+        parameters: {
+          type: "object",
+          properties: {
+            query: {
+              type: "string",
+              description:
+                "The search query containing criteria to fetch product descriptions.",
+            },
+          },
+          required: ["query"],
+        },
+      },
+      {
+        name: "searchByImage",
+        description: "Allows a user to search using an image. ",
+        parameters: {
+          type: "object",
+          properties: {
+            placeholder: {
+              type: "string",
+              description:
+                "A placeholder parameter when no specific parameters are needed",
+            },
+          },
+          required: [],
+        },
+      },
+    ],
+  },
+});
+
 const Voice = ({ setFilters }) => {
   const [initialized, setInitialized] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -17,125 +156,6 @@ const Voice = ({ setFilters }) => {
   const location = useLocation();
 
   // Gemini model setup
-  const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
-    tools: {
-      functionDeclarations: [
-        {
-          name: "addToCart",
-          description: "Add an item to the shopping cart",
-          parameters: {
-            type: "object",
-            properties: {
-              query: { type: "string", description: "The item to add" },
-            },
-            required: ["query"],
-          },
-        },
-        {
-          name: "groupSearch",
-          description: "Search for a group of products",
-          parameters: {
-            type: "object",
-            properties: {
-              query: { type: "string", description: "Search query" },
-            },
-            required: ["query"],
-          },
-        },
-        {
-          name: "finalizeCart",
-          description: "Finalize and checkout",
-          parameters: {
-            type: "object",
-            properties: {
-              confirmation: {
-                type: "boolean",
-                description: "Confirmation to finalize",
-              },
-            },
-            required: ["confirmation"],
-          },
-        },
-        {
-          name: "particularSearch",
-          description: "Search for a specific product and view its details",
-          parameters: {
-            type: "object",
-            properties: {
-              query: {
-                type: "string",
-                description: "The search query for the specific product",
-              },
-            },
-            required: ["query"],
-          },
-        },
-        {
-          name: "filterInteraction",
-          description: "Apply filters to the current product list",
-          parameters: {
-            type: "object",
-            properties: {
-              query: {
-                type: "string",
-                description: "The filter message containing filter criteria",
-              },
-            },
-            required: ["query"],
-          },
-        },
-        {
-          name: "fetchProductDescriptionOrDetails",
-          description:
-            "Fetch descriptions or details based on the provided search query for a particular product after searching for particular product. If asked for more details execute this function. ",
-          parameters: {
-            type: "object",
-            properties: {
-              query: {
-                type: "string",
-                description:
-                  "The search query containing criteria to fetch product descriptions.",
-              },
-            },
-            required: ["query"],
-          },
-        },
-        {
-          name: "recommendProducts",
-          description:
-            "Recommend products based on user preferences or popular items. This function is called when the user requests product recommendations without providing any details. If details are provided use the groupSearch or particularSearch appropriately.",
-          parameters: {
-            type: "object",
-            properties: {
-              query: {
-                type: "string",
-                description:
-                  "The search query containing criteria to fetch product descriptions.",
-              },
-            },
-            required: ["query"],
-          },
-        },
-        {
-          name: "resetFilters",
-          description:
-            "Reset all applied filters to their default state. This function is called when the user requests to clear all filters without providing any specific details. It ensures that the product list is displayed without any filtering criteria.",
-          parameters: {
-            type: "object",
-            properties: {
-              query: {
-                type: "string",
-                description:
-                  "The search query containing criteria to fetch product descriptions.",
-              },
-            },
-            required: ["query"],
-          },
-        },
-      ],
-    },
-  });
 
   // Speech synthesis function
   const speakText = (text) => {
@@ -211,6 +231,9 @@ const Voice = ({ setFilters }) => {
       case "resetFilters":
         await resetFilters();
         break;
+      case "searchByImage":
+        await searchByImage();
+        break;
       default:
         speakText("I couldn't perform that action.");
     }
@@ -246,10 +269,8 @@ const Voice = ({ setFilters }) => {
 
   const finalizeCart = async (confirmation) => {
     if (confirmation) {
-      await axios.get(`/finalize_cart/`);
-      speakText("Your cart has been finalized.");
-    } else {
-      speakText("Cart finalization canceled.");
+      const response = await axios.get(`${BASE_URL}finalize_cart/`);
+      speakText(response.data.message);
     }
   };
 
@@ -282,6 +303,10 @@ const Voice = ({ setFilters }) => {
   const resetFilters = async () => {
     const response = await axios.get(`${BASE_URL}filter_reset/`);
     setFilters([]);
+  };
+
+  const searchByImage = async () => {
+    navigate("/image-search");
   };
 
   useEffect(() => {
