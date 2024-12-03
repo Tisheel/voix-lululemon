@@ -23,7 +23,7 @@ const model = genAI.getGenerativeModel({
               description: "Name of the product to be added to the cart",
             },
           },
-          required: [],
+          required: ["query"],
         },
       },
       {
@@ -157,6 +157,20 @@ const model = genAI.getGenerativeModel({
           required: [],
         },
       },
+      {
+        name: "generalPrompt",
+        description: "Execute this if no other function qualifies. ",
+        parameters: {
+          type: "object",
+          properties: {
+            query: {
+              type: "string",
+              description: "The search query that the user mentioned. ",
+            },
+          },
+          required: ["query"],
+        },
+      },
     ],
   },
 });
@@ -252,8 +266,16 @@ const Voice = ({ setFilters }) => {
         await thankAndDeliveryDate();
         break;
       default:
-        speakText("I couldn't perform that action.");
+        await generalPrompt();
     }
+  };
+
+  const generalPrompt = async (query) => {
+    const response = await axios.get(`${BASE_URL}general_salesman/`, {
+      params: { data: query },
+    });
+    console.log(response);
+    speakText(response.data.message);
   };
 
   // Functions to execute specific commands
@@ -278,9 +300,9 @@ const Voice = ({ setFilters }) => {
       search: `?search-item=${encodeURIComponent(query)}`,
     });
     annyang.abort();
-    speakText(
-      `Here are the details you asked for. Do you wanna know more about the product. `
-    );
+    // speakText(
+    //   `Here are the details you asked for. Do you wanna know more about the product. `
+    // );
     annyang.start();
   };
 
@@ -304,7 +326,8 @@ const Voice = ({ setFilters }) => {
 
   const fetchProductDescription = async () => {
     const urlparams = new URLSearchParams(window.location.search);
-    const searchQuery = urlparams.get("search") || "";
+    const searchQuery = urlparams.get("search-item") || "";
+    console.log(searchQuery);
     const response = await axios.get(
       BASE_URL + "product_description_conversationalist/",
       { params: { search: searchQuery } }
@@ -403,6 +426,7 @@ const Voice = ({ setFilters }) => {
           "scroll down": () => window.scrollBy(0, 300), // Scroll down by 300px
           "scroll up": () => window.scrollBy(0, -300), // Scroll up by 300px
           "*text previous page": () => navigate(-1),
+          "add it to my cart": () => addToCart("dummy"),
         };
 
         annyang.addCommands(commands);
