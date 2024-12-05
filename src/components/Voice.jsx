@@ -500,72 +500,130 @@ const Voice = ({ setFilters }) => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex justify-center items-center">
-      {/* Toggle Circle */}
-      <div
-        onClick={handleButtonClick} // Use handleButtonClick to toggle state
-        className={`circle ${isListening ? "listening" : ""}`}
-      >
-        {isListening && (
-          <div className="wavy">
-            <div className="cylinder delay-0"></div>
-            <div className="cylinder delay-200"></div>
-            <div className="cylinder delay-400"></div>
-          </div>
-        )}
+    <>
+      <div className="fixed bottom-4 right-4 z-50 flex justify-center items-center">
+        {/* Voice Bot Button */}
+        <div
+          onClick={handleButtonClick}
+          className={`voice-bot ${isListening ? "active" : ""}`}
+        >
+          <div className="center-icon">🎙</div>
+          {isListening && (
+            <>
+              <div className="pulse"></div>
+              <div className="orbit">
+                <span className="dot"></span>
+                <span className="dot delay-1"></span>
+                <span className="dot delay-2"></span>
+              </div>
+            </>
+          )}
+        </div>
+
+        <style jsx>{`
+          .voice-bot {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            background-color: black;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+          }
+
+          .voice-bot.active {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 200, 255, 0.8),
+              0 0 40px rgba(0, 200, 255, 1);
+          }
+
+          .center-icon {
+            font-size: 28px;
+            color: white;
+            z-index: 2;
+          }
+
+          .pulse {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 3px solid rgba(0, 200, 255, 0.6);
+            border-radius: 50%;
+            animation: pulseEffect 1.5s infinite;
+            z-index: 1;
+          }
+
+          @keyframes pulseEffect {
+            0% {
+              transform: scale(1);
+              opacity: 0.8;
+            }
+            100% {
+              transform: scale(1.6);
+              opacity: 0;
+            }
+          }
+
+          .orbit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 120px;
+            height: 120px;
+            transform: translate(-50%, -50%);
+            animation: rotate 3s linear infinite;
+            z-index: 0;
+          }
+
+          @keyframes rotate {
+            0% {
+              transform: translate(-50%, -50%) rotate(0deg);
+            }
+            100% {
+              transform: translate(-50%, -50%) rotate(360deg);
+            }
+          }
+
+          .dot {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: rgba(0, 200, 255, 0.8);
+            border-radius: 50%;
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: orbitDot 1.5s infinite;
+          }
+
+          .dot.delay-1 {
+            animation-delay: 0.5s;
+          }
+
+          .dot.delay-2 {
+            animation-delay: 1s;
+          }
+
+          @keyframes orbitDot {
+            0% {
+              opacity: 0.8;
+              transform: translate(-50%, -50%) scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: translate(-50%, -50%) scale(1.2);
+            }
+            100% {
+              opacity: 0.8;
+              transform: translate(-50%, -50%) scale(1);
+            }
+          }
+        `}</style>
       </div>
-
-      <style jsx>{`
-        .circle {
-          width: 60px;
-          height: 60px;
-          background-color: black;
-          border-radius: 50%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          cursor: pointer;
-          transition: background-color 0.3s ease;
-          position: relative;
-        }
-
-        .circle.listening {
-          background-color: transparent; /* Hide the black background */
-        }
-
-        .wavy {
-          display: flex;
-          gap: 4px;
-          position: absolute;
-        }
-
-        .cylinder {
-          width: 15px;
-          height: 30px;
-          background-color: black;
-          border-radius: 4px;
-          animation: wave 1.5s infinite;
-        }
-
-        .cylinder.delay-200 {
-          animation-delay: 0.2s;
-        }
-
-        .cylinder.delay-400 {
-          animation-delay: 0.4s;
-        }
-
-        @keyframes wave {
-          0%,
-          100% {
-            transform: scaleY(1);
-          }
-          50% {
-            transform: scaleY(1.5);
-          }
-        }
-      `}</style>
-    </div>
+    </>
   );
 };
 
